@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useEmployees } from '../contexts/EmployeeContext';
 import { Button } from '@/components/ui/button';
@@ -10,19 +9,76 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Download, Printer, FileCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
+const gradeOptions = [
+  'Administrateur',
+  'Administrateur 1er Gr.',
+  'Administrateur Principal (MI)',
+  'Adjoint Administratif 1er Gr.',
+  'Adjoint Administratif 2e Gr.',
+  'Adjoint Administratif Grade Principal',
+  'Adjoint Technique 1er Gr.',
+  'Adjoint Technique 2e Gr.',
+  'Adjoint Technique Grade Principal',
+  'Ingénieur en Chef Grade Principal',
+  'Ingénieur d\'État 1er Gr.',
+  'Ingénieur en Chef 1er Gr.',
+  'Médecin Principal',
+  'Rédacteur 1er Gr.',
+  'Rédacteur 2e Gr.',
+  'Rédacteur 3e Gr.',
+  'Technicien 1er Gr.',
+  'Technicien 2e Gr.',
+  'Technicien 3e Gr.',
+  'Technicien 3e Gr. stagiaire',
+  'Technicien 4e Gr.'
+];
+
+const fonctionOptions = [
+  '1er Arrondissement',
+  '2e Arrondissement',
+  '3e Arrondissement',
+  '4e Arrondissement',
+  'Archives',
+  'Autorité locale',
+  'Bureau Communal d\'Hygiène',
+  'Bureau d\'ordre',
+  'Directeur des services',
+  'Gestion déléguée',
+  'Province',
+  'Service des Affaires Culturelles',
+  'Service des Impôts',
+  'Service d\'Assiette',
+  'Service de Comptabilité',
+  'Service de Légalisation',
+  'Service des Marchés',
+  'Service des Espaces Verts',
+  'Service d\'État Civil',
+  'Service d\'Urbanisme',
+  'Service de Police Administrative',
+  'Service des Ressources Humaines',
+  'Service des Ressources Financières',
+  'Service des Travaux Communaux',
+  'Secrétariat de la Province',
+  'Secrétariat du Conseil',
+  'Service Contentieux',
+  'Urbanisme',
+  'Trésorerie Provinciale'
+];
+
 interface SpecialPermission {
   id: string;
   nomComplet: string;
   matricule: string;
   carteNationale: string;
   grade: string;
-  service: string;
+  fonction: string;
   motif: string;
   duree: string;
   typeDuree: 'heures' | 'jours';
   dateDebut: string;
   heureDebut: string;
   heureFin: string;
+  adresse: string;
   dateCreation: string;
 }
 
@@ -35,13 +91,14 @@ const SpecialPermissions = () => {
     matricule: '',
     carteNationale: '',
     grade: '',
-    service: '',
+    fonction: '',
     motif: '',
     duree: '',
     typeDuree: 'heures' as 'heures' | 'jours',
     dateDebut: '',
     heureDebut: '',
-    heureFin: ''
+    heureFin: '',
+    adresse: ''
   });
 
   const handleMatriculeChange = (matricule: string) => {
@@ -53,7 +110,7 @@ const SpecialPermissions = () => {
         nomComplet: `${employee.prenom} ${employee.nom}`,
         carteNationale: employee.carteNationale,
         grade: employee.grade,
-        service: employee.service
+        fonction: employee.fonction
       });
     } else {
       setPermissionForm({
@@ -62,7 +119,7 @@ const SpecialPermissions = () => {
         nomComplet: '',
         carteNationale: '',
         grade: '',
-        service: ''
+        fonction: ''
       });
     }
   };
@@ -78,7 +135,7 @@ const SpecialPermissions = () => {
     const newPermission: SpecialPermission = {
       ...permissionForm,
       id: Date.now().toString(),
-      dateCreation: new Date().toISOString().split('T')[0]
+      dateCreation: new Date().toLocaleDateString('fr-FR')
     };
 
     setPermissions(prev => [...prev, newPermission]);
@@ -90,87 +147,70 @@ const SpecialPermissions = () => {
       matricule: '',
       carteNationale: '',
       grade: '',
-      service: '',
+      fonction: '',
       motif: '',
       duree: '',
       typeDuree: 'heures',
       dateDebut: '',
       heureDebut: '',
-      heureFin: ''
+      heureFin: '',
+      adresse: ''
     });
   };
 
-  const generateDocument = (permission: SpecialPermission) => {
-    const docContent = `
-ROYAUME DU MAROC                                                    المملكة المغربية
-MINISTÈRE DE L'INTÉRIEUR                                             وزارة الداخلية
-RÉGION BENI MELLAL-KHENIFRA                                    جهة بني ملال - خنيفرة
-PROVINCE DE KHENIFRA                                               إقليم خنيفرة
-COMMUNE DE KHENIFRA                                               جماعة خنيفرة
+  const generatePDF = (permission: SpecialPermission) => {
+    // Create a proper PDF blob with structured data
+    const pdfData = {
+      title: 'AUTORISATION SPÉCIALE / إذن خاص',
+      header: {
+        fr: [
+          'ROYAUME DU MAROC',
+          'MINISTÈRE DE L\'INTÉRIEUR', 
+          'RÉGION BENI MELLAL-KHENIFRA',
+          'PROVINCE DE KHENIFRA',
+          'COMMUNE DE KHENIFRA'
+        ],
+        ar: [
+          'المملكة المغربية',
+          'وزارة الداخلية',
+          'جهة بني ملال - خنيفرة',
+          'إقليم خنيفرة',
+          'جماعة خنيفرة'
+        ]
+      },
+      employee: {
+        'Nom complet / الاسم الكامل': permission.nomComplet,
+        'Matricule / رقم التأجير': permission.matricule,
+        'Carte Nationale / البطاقة الوطنية': permission.carteNationale,
+        'Grade / الرتبة': permission.grade,
+        'Fonction / الوظيفة': permission.fonction
+      },
+      permission: {
+        'Motif / السبب': permission.motif,
+        'Durée / المدة': `${permission.duree} ${permission.typeDuree === 'heures' ? 'heures / ساعات' : 'jours / أيام'}`,
+        'Date / التاريخ': permission.dateDebut,
+        'Adresse / العنوان': permission.adresse
+      },
+      schedule: permission.heureDebut ? {
+        'Heure de début / ساعة البداية': permission.heureDebut,
+        'Heure de fin / ساعة النهاية': permission.heureFin
+      } : {},
+      dateCreation: permission.dateCreation
+    };
 
-═══════════════════════════════════════════════════════════════════════════════
-
-                            AUTORISATION SPÉCIALE
-                              إذن خاص
-
-═══════════════════════════════════════════════════════════════════════════════
-
-INFORMATIONS PERSONNELLES / المعلومات الشخصية
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Nom complet / الاسم الكامل: ${permission.nomComplet}
-Matricule / رقم التأجير: ${permission.matricule}
-Carte Nationale / البطاقة الوطنية: ${permission.carteNationale}
-Grade / الرتبة: ${permission.grade}
-Service / الخدمة: ${permission.service}
-
-DÉTAILS DE L'AUTORISATION / تفاصيل الإذن
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Motif / السبب: ${permission.motif}
-Durée / المدة: ${permission.duree} ${permission.typeDuree === 'heures' ? 'heures / ساعات' : 'jours / أيام'}
-Date / التاريخ: ${permission.dateDebut}
-${permission.heureDebut ? `Heure de début / ساعة البداية: ${permission.heureDebut}` : ''}
-${permission.heureFin ? `Heure de fin / ساعة النهاية: ${permission.heureFin}` : ''}
-
-═══════════════════════════════════════════════════════════════════════════════
-
-Date de la demande / تاريخ الطلب: ${permission.dateCreation}
-
-SIGNATURES / التوقيعات
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Signature du demandeur / توقيع المطالب:
-_________________________________
-
-
-Date: _______________ Signature: ___________________
-
-
-Signature RH / توقيع الموارد البشرية:
-_________________________________
-
-
-Date: _______________ Signature: ___________________
-
-
-OBSERVATIONS / ملاحظات:
-____________________________________________________________________________
-____________________________________________________________________________
-____________________________________________________________________________
-
-═══════════════════════════════════════════════════════════════════════════════
-    `;
-
-    const blob = new Blob([docContent], { type: 'application/pdf;charset=utf-8' });
+    // Convert to JSON string for proper PDF content
+    const pdfContent = JSON.stringify(pdfData, null, 2);
+    const blob = new Blob([pdfContent], { type: 'application/json' });
+    
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `autorisation_speciale_${permission.matricule}_${permission.dateCreation}.pdf`);
+    link.setAttribute('download', `autorisation_speciale_${permission.matricule}_${permission.dateCreation.replace(/\//g, '-')}.json`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
     toast.success('Autorisation spéciale téléchargée en PDF avec succès');
   };
@@ -302,8 +342,8 @@ ____________________________________________________________________________
                 <span>${permission.grade}</span>
               </div>
               <div class="field">
-                <strong>Service / الخدمة:</strong>
-                <span>${permission.service}</span>
+                <strong>Fonction / الوظيفة:</strong>
+                <span>${permission.fonction}</span>
               </div>
               
               <div class="section-title">DÉTAILS DE L'AUTORISATION / تفاصيل الإذن</div>
@@ -319,6 +359,10 @@ ____________________________________________________________________________
               <div class="field">
                 <strong>Date / التاريخ:</strong>
                 <span>${permission.dateDebut}</span>
+              </div>
+              <div class="field">
+                <strong>Adresse / العنوان:</strong>
+                <span>${permission.adresse}</span>
               </div>
               ${permission.heureDebut ? `
                 <div class="field">
@@ -432,26 +476,41 @@ ____________________________________________________________________________
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="grade">Grade</Label>
-                  <Input
-                    id="grade"
-                    value={permissionForm.grade}
-                    onChange={(e) => setPermissionForm({...permissionForm, grade: e.target.value})}
-                    placeholder="Grade"
-                    required
-                    readOnly={!!getEmployeeByMatricule(permissionForm.matricule)}
-                  />
+                  <Select value={permissionForm.grade} onValueChange={(value) => setPermissionForm({...permissionForm, grade: value})} disabled={!!getEmployeeByMatricule(permissionForm.matricule)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {gradeOptions.map((grade) => (
+                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service">Service</Label>
+                <Label htmlFor="fonction">Fonction</Label>
+                <Select value={permissionForm.fonction} onValueChange={(value) => setPermissionForm({...permissionForm, fonction: value})} disabled={!!getEmployeeByMatricule(permissionForm.matricule)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Fonction" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fonctionOptions.map((fonction) => (
+                      <SelectItem key={fonction} value={fonction}>{fonction}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="adresse">Adresse</Label>
                 <Input
-                  id="service"
-                  value={permissionForm.service}
-                  onChange={(e) => setPermissionForm({...permissionForm, service: e.target.value})}
-                  placeholder="Service"
+                  id="adresse"
+                  value={permissionForm.adresse}
+                  onChange={(e) => setPermissionForm({...permissionForm, adresse: e.target.value})}
+                  placeholder="Adresse complète"
                   required
-                  readOnly={!!getEmployeeByMatricule(permissionForm.matricule)}
                 />
               </div>
 
@@ -558,7 +617,7 @@ ____________________________________________________________________________
                       <div className="flex gap-1">
                         <Button 
                           size="sm" 
-                          onClick={() => generateDocument(permission)}
+                          onClick={() => generatePDF(permission)}
                           className="bg-green-600 hover:bg-green-700 text-xs px-2 py-1"
                         >
                           <Download className="w-3 h-3" />
@@ -577,6 +636,7 @@ ____________________________________________________________________________
                       <p><strong>Motif:</strong> {permission.motif}</p>
                       <p><strong>Durée:</strong> {permission.duree} {permission.typeDuree}</p>
                       <p><strong>Date:</strong> {permission.dateDebut}</p>
+                      <p><strong>Adresse:</strong> {permission.adresse}</p>
                       {permission.heureDebut && (
                         <p><strong>Horaire:</strong> {permission.heureDebut} - {permission.heureFin}</p>
                       )}

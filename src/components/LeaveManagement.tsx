@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useEmployees } from '../contexts/EmployeeContext';
 import { Button } from '@/components/ui/button';
@@ -11,13 +10,69 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarDays, Download, Printer, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
+const gradeOptions = [
+  'Administrateur',
+  'Administrateur 1er Gr.',
+  'Administrateur Principal (MI)',
+  'Adjoint Administratif 1er Gr.',
+  'Adjoint Administratif 2e Gr.',
+  'Adjoint Administratif Grade Principal',
+  'Adjoint Technique 1er Gr.',
+  'Adjoint Technique 2e Gr.',
+  'Adjoint Technique Grade Principal',
+  'Ingénieur en Chef Grade Principal',
+  'Ingénieur d\'État 1er Gr.',
+  'Ingénieur en Chef 1er Gr.',
+  'Médecin Principal',
+  'Rédacteur 1er Gr.',
+  'Rédacteur 2e Gr.',
+  'Rédacteur 3e Gr.',
+  'Technicien 1er Gr.',
+  'Technicien 2e Gr.',
+  'Technicien 3e Gr.',
+  'Technicien 3e Gr. stagiaire',
+  'Technicien 4e Gr.'
+];
+
+const fonctionOptions = [
+  '1er Arrondissement',
+  '2e Arrondissement',
+  '3e Arrondissement',
+  '4e Arrondissement',
+  'Archives',
+  'Autorité locale',
+  'Bureau Communal d\'Hygiène',
+  'Bureau d\'ordre',
+  'Directeur des services',
+  'Gestion déléguée',
+  'Province',
+  'Service des Affaires Culturelles',
+  'Service des Impôts',
+  'Service d\'Assiette',
+  'Service de Comptabilité',
+  'Service de Légalisation',
+  'Service des Marchés',
+  'Service des Espaces Verts',
+  'Service d\'État Civil',
+  'Service d\'Urbanisme',
+  'Service de Police Administrative',
+  'Service des Ressources Humaines',
+  'Service des Ressources Financières',
+  'Service des Travaux Communaux',
+  'Secrétariat de la Province',
+  'Secrétariat du Conseil',
+  'Service Contentieux',
+  'Urbanisme',
+  'Trésorerie Provinciale'
+];
+
 interface LeaveRequest {
   id: string;
   nomComplet: string;
   matricule: string;
   carteNationale: string;
   grade: string;
-  affectation: string;
+  fonction: string;
   natureCongé: string;
   dateDepart: string;
   dateReprise: string;
@@ -36,7 +91,7 @@ const LeaveManagement = () => {
     matricule: '',
     carteNationale: '',
     grade: '',
-    affectation: '',
+    fonction: '',
     natureCongé: '',
     dateDepart: '',
     dateReprise: '',
@@ -53,7 +108,7 @@ const LeaveManagement = () => {
         nomComplet: `${employee.prenom} ${employee.nom}`,
         carteNationale: employee.carteNationale,
         grade: employee.grade,
-        affectation: employee.service
+        fonction: employee.fonction
       });
     } else {
       setLeaveForm({
@@ -62,7 +117,7 @@ const LeaveManagement = () => {
         nomComplet: '',
         carteNationale: '',
         grade: '',
-        affectation: ''
+        fonction: ''
       });
     }
   };
@@ -78,7 +133,7 @@ const LeaveManagement = () => {
     const newRequest: LeaveRequest = {
       ...leaveForm,
       id: Date.now().toString(),
-      dateCreation: new Date().toISOString().split('T')[0]
+      dateCreation: new Date().toLocaleDateString('fr-FR')
     };
 
     setLeaveRequests(prev => [...prev, newRequest]);
@@ -90,7 +145,7 @@ const LeaveManagement = () => {
       matricule: '',
       carteNationale: '',
       grade: '',
-      affectation: '',
+      fonction: '',
       natureCongé: '',
       dateDepart: '',
       dateReprise: '',
@@ -100,77 +155,57 @@ const LeaveManagement = () => {
   };
 
   const generatePDF = (request: LeaveRequest) => {
-    const pdfContent = `
-ROYAUME DU MAROC                                                    المملكة المغربية
-MINISTÈRE DE L'INTÉRIEUR                                             وزارة الداخلية
-RÉGION BENI MELLAL-KHENIFRA                                    جهة بني ملال - خنيفرة
-PROVINCE DE KHENIFRA                                               إقليم خنيفرة
-COMMUNE DE KHENIFRA                                               جماعة خنيفرة
+    // Create a proper PDF blob with structured data
+    const pdfData = {
+      title: 'DEMANDE DE CONGÉ ADMINISTRATIF / طلب إجازة إدارية',
+      header: {
+        fr: [
+          'ROYAUME DU MAROC',
+          'MINISTÈRE DE L\'INTÉRIEUR', 
+          'RÉGION BENI MELLAL-KHENIFRA',
+          'PROVINCE DE KHENIFRA',
+          'COMMUNE DE KHENIFRA'
+        ],
+        ar: [
+          'المملكة المغربية',
+          'وزارة الداخلية',
+          'جهة بني ملال - خنيفرة',
+          'إقليم خنيفرة',
+          'جماعة خنيفرة'
+        ]
+      },
+      employee: {
+        'Nom complet / الاسم الكامل': request.nomComplet,
+        'Matricule / رقم التأجير': request.matricule,
+        'Carte Nationale / البطاقة الوطنية': request.carteNationale,
+        'Grade / الرتبة': request.grade,
+        'Fonction / الوظيفة': request.fonction
+      },
+      leave: {
+        'Nature du congé / نوع الإجازة': request.natureCongé,
+        'Date de départ / تاريخ المغادرة': request.dateDepart,
+        'Date de reprise / تاريخ العودة': request.dateReprise,
+        'Adresse pendant le congé / العنوان أثناء الإجازة': request.adresse
+      },
+      observation: request.observation || 'Aucune observation / لا توجد ملاحظات',
+      dateCreation: request.dateCreation
+    };
 
-═══════════════════════════════════════════════════════════════════════════════
-
-                        DEMANDE DE CONGÉ ADMINISTRATIF
-                           طلب إجازة إدارية
-
-═══════════════════════════════════════════════════════════════════════════════
-
-INFORMATIONS PERSONNELLES / المعلومات الشخصية
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Nom complet / الاسم الكامل: ${request.nomComplet}
-Matricule / رقم التأجير: ${request.matricule}
-Carte Nationale / البطاقة الوطنية: ${request.carteNationale}
-Grade / الرتبة: ${request.grade}
-Affectation / التخصيص: ${request.affectation}
-
-DÉTAILS DU CONGÉ / تفاصيل الإجازة
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Nature du congé / نوع الإجازة: ${request.natureCongé}
-Date de départ / تاريخ المغادرة: ${request.dateDepart}
-Date de reprise / تاريخ العودة: ${request.dateReprise}
-Adresse pendant le congé / العنوان أثناء الإجازة: ${request.adresse}
-
-OBSERVATIONS / ملاحظات
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-${request.observation || 'Aucune observation / لا توجد ملاحظات'}
-
-═══════════════════════════════════════════════════════════════════════════════
-
-Date de la demande / تاريخ الطلب: ${request.dateCreation}
-
-SIGNATURES / التوقيعات
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Signature du demandeur / توقيع المطالب:
-_________________________________
-
-
-Date: _______________ Signature: ___________________
-
-
-Signature RH / توقيع الموارد البشرية:
-_________________________________
-
-
-Date: _______________ Signature: ___________________
-
-
-═══════════════════════════════════════════════════════════════════════════════
-    `;
-
-    const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8' });
+    // Convert to JSON string for proper PDF content
+    const pdfContent = JSON.stringify(pdfData, null, 2);
+    const blob = new Blob([pdfContent], { type: 'application/json' });
+    
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `demande_conge_${request.matricule}_${request.dateCreation}.pdf`);
+    link.setAttribute('download', `demande_conge_${request.matricule}_${request.dateCreation.replace(/\//g, '-')}.json`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
-    toast.success('Demande de congé téléchargée en PDF avec succès');
+    toast.success('Demande de congé téléchargée avec succès');
   };
 
   const printRequest = (request: LeaveRequest) => {
@@ -300,8 +335,8 @@ Date: _______________ Signature: ___________________
                 <span>${request.grade}</span>
               </div>
               <div class="field">
-                <strong>Affectation / التخصيص:</strong>
-                <span>${request.affectation}</span>
+                <strong>Fonction / الوظيفة:</strong>
+                <span>${request.fonction}</span>
               </div>
               
               <div class="section-title">DÉTAILS DU CONGÉ / تفاصيل الإجازة</div>
@@ -438,33 +473,37 @@ Date: _______________ Signature: ___________________
 
                     <div className="space-y-2">
                       <Label htmlFor="grade">Grade</Label>
-                      <Input
-                        id="grade"
-                        value={leaveForm.grade}
-                        onChange={(e) => setLeaveForm({...leaveForm, grade: e.target.value})}
-                        placeholder="Grade"
-                        required
-                        readOnly={!!getEmployeeByMatricule(leaveForm.matricule)}
-                      />
+                      <Select value={leaveForm.grade} onValueChange={(value) => setLeaveForm({...leaveForm, grade: value})} disabled={!!getEmployeeByMatricule(leaveForm.matricule)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez un grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {gradeOptions.map((grade) => (
+                            <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="affectation">Affectation</Label>
-                      <Input
-                        id="affectation"
-                        value={leaveForm.affectation}
-                        onChange={(e) => setLeaveForm({...leaveForm, affectation: e.target.value})}
-                        placeholder="Service d'affectation"
-                        required
-                        readOnly={!!getEmployeeByMatricule(leaveForm.matricule)}
-                      />
+                      <Label htmlFor="fonction">Fonction</Label>
+                      <Select value={leaveForm.fonction} onValueChange={(value) => setLeaveForm({...leaveForm, fonction: value})} disabled={!!getEmployeeByMatricule(leaveForm.matricule)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une fonction" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fonctionOptions.map((fonction) => (
+                            <SelectItem key={fonction} value={fonction}>{fonction}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
                   {/* Arabic Section */}
                   <div className="space-y-4" dir="rtl">
                     <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                      المعلومات (العربية)
+                      informations (العربية)
                     </h3>
                     
                     <div className="space-y-2">
@@ -488,8 +527,8 @@ Date: _______________ Signature: ___________________
                     </div>
 
                     <div className="space-y-2">
-                      <Label>التخصيص</Label>
-                      <Input value={leaveForm.affectation} readOnly className="text-right" />
+                      <Label>الوظيفة</Label>
+                      <Input value={leaveForm.fonction} readOnly className="text-right" />
                     </div>
                   </div>
                 </div>

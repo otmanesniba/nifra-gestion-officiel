@@ -8,7 +8,8 @@ export interface Employee {
   carteNationale: string;
   matricule: string;
   grade: string;
-  service: string;
+  fonction: string;
+  adresse: string;
   dateCreation: string;
 }
 
@@ -29,39 +30,14 @@ export const useEmployees = () => {
   return context;
 };
 
-interface EmployeeProviderProps {
-  children: ReactNode;
-}
-
-export const EmployeeProvider = ({ children }: EmployeeProviderProps) => {
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: '1',
-      nom: 'BENALI',
-      prenom: 'Mohammed',
-      carteNationale: 'AB123456',
-      matricule: 'MAT001',
-      grade: 'Administrateur Principal',
-      service: 'Ressources Humaines',
-      dateCreation: '2024-01-15'
-    },
-    {
-      id: '2',
-      nom: 'ALAMI',
-      prenom: 'Fatima',
-      carteNationale: 'CD789012',
-      matricule: 'MAT002',
-      grade: 'Technicien',
-      service: 'Finances',
-      dateCreation: '2024-02-10'
-    }
-  ]);
+export const EmployeeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   const addEmployee = (employeeData: Omit<Employee, 'id' | 'dateCreation'>) => {
     const newEmployee: Employee = {
       ...employeeData,
       id: Date.now().toString(),
-      dateCreation: new Date().toISOString().split('T')[0]
+      dateCreation: new Date().toLocaleDateString('fr-FR')
     };
     setEmployees(prev => [...prev, newEmployee]);
   };
@@ -80,7 +56,12 @@ export const EmployeeProvider = ({ children }: EmployeeProviderProps) => {
   };
 
   return (
-    <EmployeeContext.Provider value={{ employees, addEmployee, deleteEmployee, getEmployeeByMatricule }}>
+    <EmployeeContext.Provider value={{
+      employees,
+      addEmployee,
+      deleteEmployee,
+      getEmployeeByMatricule
+    }}>
       {children}
     </EmployeeContext.Provider>
   );

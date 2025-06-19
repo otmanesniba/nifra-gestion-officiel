@@ -5,10 +5,67 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserPlus, UserMinus, Users, Search, Download } from 'lucide-react';
 import { toast } from 'sonner';
+
+const gradeOptions = [
+  'Administrateur',
+  'Administrateur 1er Gr.',
+  'Administrateur Principal (MI)',
+  'Adjoint Administratif 1er Gr.',
+  'Adjoint Administratif 2e Gr.',
+  'Adjoint Administratif Grade Principal',
+  'Adjoint Technique 1er Gr.',
+  'Adjoint Technique 2e Gr.',
+  'Adjoint Technique Grade Principal',
+  'Ingénieur en Chef Grade Principal',
+  'Ingénieur d\'État 1er Gr.',
+  'Ingénieur en Chef 1er Gr.',
+  'Médecin Principal',
+  'Rédacteur 1er Gr.',
+  'Rédacteur 2e Gr.',
+  'Rédacteur 3e Gr.',
+  'Technicien 1er Gr.',
+  'Technicien 2e Gr.',
+  'Technicien 3e Gr.',
+  'Technicien 3e Gr. stagiaire',
+  'Technicien 4e Gr.'
+];
+
+const fonctionOptions = [
+  '1er Arrondissement',
+  '2e Arrondissement',
+  '3e Arrondissement',
+  '4e Arrondissement',
+  'Archives',
+  'Autorité locale',
+  'Bureau Communal d\'Hygiène',
+  'Bureau d\'ordre',
+  'Directeur des services',
+  'Gestion déléguée',
+  'Province',
+  'Service des Affaires Culturelles',
+  'Service des Impôts',
+  'Service d\'Assiette',
+  'Service de Comptabilité',
+  'Service de Légalisation',
+  'Service des Marchés',
+  'Service des Espaces Verts',
+  'Service d\'État Civil',
+  'Service d\'Urbanisme',
+  'Service de Police Administrative',
+  'Service des Ressources Humaines',
+  'Service des Ressources Financières',
+  'Service des Travaux Communaux',
+  'Secrétariat de la Province',
+  'Secrétariat du Conseil',
+  'Service Contentieux',
+  'Urbanisme',
+  'Trésorerie Provinciale'
+];
 
 const EmployeeManagement = () => {
   const { employees, addEmployee, deleteEmployee, getEmployeeByMatricule } = useEmployees();
@@ -21,7 +78,8 @@ const EmployeeManagement = () => {
     carteNationale: '',
     matricule: '',
     grade: '',
-    service: ''
+    fonction: '',
+    adresse: ''
   });
 
   // Delete Employee State
@@ -49,7 +107,8 @@ const EmployeeManagement = () => {
       carteNationale: '',
       matricule: '',
       grade: '',
-      service: ''
+      fonction: '',
+      adresse: ''
     });
   };
 
@@ -83,8 +142,8 @@ const EmployeeManagement = () => {
 
   const exportToExcel = () => {
     const csvContent = [
-      ['Nom', 'Prénom', 'Carte Nationale', 'Matricule', 'Grade', 'Service', 'Date de Création'],
-      ...employees.map(emp => [emp.nom, emp.prenom, emp.carteNationale, emp.matricule, emp.grade, emp.service, emp.dateCreation])
+      ['Nom', 'Prénom', 'Carte Nationale', 'Matricule', 'Grade', 'Fonction', 'Adresse', 'Date de Création'],
+      ...employees.map(emp => [emp.nom, emp.prenom, emp.carteNationale, emp.matricule, emp.grade, emp.fonction, emp.adresse, emp.dateCreation])
     ].map(row => row.join(',')).join('\n');
 
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -176,21 +235,37 @@ const EmployeeManagement = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="grade">Grade</Label>
-                  <Input
-                    id="grade"
-                    value={addForm.grade}
-                    onChange={(e) => setAddForm({...addForm, grade: e.target.value})}
-                    placeholder="Grade"
-                    required
-                  />
+                  <Select value={addForm.grade} onValueChange={(value) => setAddForm({...addForm, grade: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez un grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {gradeOptions.map((grade) => (
+                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="service">Service</Label>
+                  <Label htmlFor="fonction">Fonction</Label>
+                  <Select value={addForm.fonction} onValueChange={(value) => setAddForm({...addForm, fonction: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez une fonction" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fonctionOptions.map((fonction) => (
+                        <SelectItem key={fonction} value={fonction}>{fonction}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="adresse">Adresse</Label>
                   <Input
-                    id="service"
-                    value={addForm.service}
-                    onChange={(e) => setAddForm({...addForm, service: e.target.value})}
-                    placeholder="Service/Département"
+                    id="adresse"
+                    value={addForm.adresse}
+                    onChange={(e) => setAddForm({...addForm, adresse: e.target.value})}
+                    placeholder="Adresse complète"
                     required
                   />
                 </div>
@@ -229,7 +304,7 @@ const EmployeeManagement = () => {
                       <p className="font-medium">Employé trouvé:</p>
                       <p><strong>Nom:</strong> {employeeToDelete.nom} {employeeToDelete.prenom}</p>
                       <p><strong>Grade:</strong> {employeeToDelete.grade}</p>
-                      <p><strong>Service:</strong> {employeeToDelete.service}</p>
+                      <p><strong>Fonction:</strong> {employeeToDelete.fonction}</p>
                       <Button 
                         onClick={handleDeleteConfirm} 
                         variant="destructive" 
@@ -266,7 +341,8 @@ const EmployeeManagement = () => {
                       <th className="border border-gray-300 px-4 py-2 text-left">Nom</th>
                       <th className="border border-gray-300 px-4 py-2 text-left">Prénom</th>
                       <th className="border border-gray-300 px-4 py-2 text-left">Grade</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Service</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Fonction</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Adresse</th>
                       <th className="border border-gray-300 px-4 py-2 text-left">Date Création</th>
                     </tr>
                   </thead>
@@ -277,7 +353,8 @@ const EmployeeManagement = () => {
                         <td className="border border-gray-300 px-4 py-2">{employee.nom}</td>
                         <td className="border border-gray-300 px-4 py-2">{employee.prenom}</td>
                         <td className="border border-gray-300 px-4 py-2">{employee.grade}</td>
-                        <td className="border border-gray-300 px-4 py-2">{employee.service}</td>
+                        <td className="border border-gray-300 px-4 py-2">{employee.fonction}</td>
+                        <td className="border border-gray-300 px-4 py-2">{employee.adresse}</td>
                         <td className="border border-gray-300 px-4 py-2">{employee.dateCreation}</td>
                       </tr>
                     ))}
@@ -318,7 +395,8 @@ const EmployeeManagement = () => {
                         <p><strong>Carte Nationale:</strong> {searchResult.carteNationale}</p>
                         <p><strong>Matricule:</strong> {searchResult.matricule}</p>
                         <p><strong>Grade:</strong> {searchResult.grade}</p>
-                        <p><strong>Service:</strong> {searchResult.service}</p>
+                        <p><strong>Fonction:</strong> {searchResult.fonction}</p>
+                        <p><strong>Adresse:</strong> {searchResult.adresse}</p>
                       </div>
                     </div>
                   </AlertDescription>
