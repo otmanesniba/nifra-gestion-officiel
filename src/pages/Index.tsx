@@ -5,12 +5,15 @@ import LoginForm from '../components/LoginForm';
 import Dashboard from '../components/Dashboard';
 import { AuthProvider } from '../contexts/AuthContext';
 import { EmployeeProvider } from '../contexts/EmployeeContext';
+import { LeaveProvider } from '../contexts/LeaveContext';
 
 const Index = () => {
   return (
     <AuthProvider>
       <EmployeeProvider>
-        <MainApp />
+        <LeaveProvider>
+          <MainApp />
+        </LeaveProvider>
       </EmployeeProvider>
     </AuthProvider>
   );

@@ -1,15 +1,15 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, FileText, LogOut, User } from 'lucide-react';
+import { Users, Calendar, FileText, LogOut, User, Calculator } from 'lucide-react';
 import Header from './Header';
 import EmployeeManagement from './EmployeeManagement';
 import LeaveManagement from './LeaveManagement';
 import SpecialPermissions from './SpecialPermissions';
+import LeaveCalculation from './LeaveCalculation';
 
-type ActiveModule = 'home' | 'employees' | 'leave' | 'permissions';
+type ActiveModule = 'home' | 'employees' | 'leave' | 'permissions' | 'calculation';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -23,9 +23,11 @@ const Dashboard = () => {
         return <LeaveManagement />;
       case 'permissions':
         return <SpecialPermissions />;
+      case 'calculation':
+        return <LeaveCalculation />;
       default:
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card 
               className="hover:shadow-lg transition-shadow cursor-pointer border-emerald-200 hover:border-emerald-400"
               onClick={() => setActiveModule('employees')}
@@ -70,6 +72,21 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
             </Card>
+
+            <Card 
+              className="hover:shadow-lg transition-shadow cursor-pointer border-orange-200 hover:border-orange-400"
+              onClick={() => setActiveModule('calculation')}
+            >
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                  <Calculator className="w-8 h-8 text-orange-600" />
+                </div>
+                <CardTitle className="text-orange-800">Espace de Calcul</CardTitle>
+                <CardDescription>
+                  Calculateur de soldes de congés annuels des employés
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         );
     }
@@ -111,6 +128,13 @@ const Dashboard = () => {
                 className={activeModule === 'permissions' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
               >
                 Autorisations
+              </Button>
+              <Button
+                variant={activeModule === 'calculation' ? 'default' : 'ghost'}
+                onClick={() => setActiveModule('calculation')}
+                className={activeModule === 'calculation' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+              >
+                Calculs
               </Button>
             </div>
             
