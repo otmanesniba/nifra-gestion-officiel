@@ -113,14 +113,6 @@ const LoginForm = () => {
                 </Button>
               </div>
             </form>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
-                <strong>Identifiants de démonstration:</strong><br />
-                Utilisateur: <code className="bg-white px-2 py-1 rounded">Youssra</code><br />
-                Mot de passe: <code className="bg-white px-2 py-1 rounded">Youssra@1234</code>
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
