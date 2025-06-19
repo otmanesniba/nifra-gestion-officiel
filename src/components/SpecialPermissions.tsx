@@ -102,48 +102,77 @@ const SpecialPermissions = () => {
 
   const generateDocument = (permission: SpecialPermission) => {
     const docContent = `
-ROYAUME DU MAROC
-MINISTÈRE DE L'INTÉRIEUR
-RÉGION BENI MELLAL-KHENIFRA
-PROVINCE DE KHENIFRA
-COMMUNE DE KHENIFRA
+ROYAUME DU MAROC                                                    المملكة المغربية
+MINISTÈRE DE L'INTÉRIEUR                                             وزارة الداخلية
+RÉGION BENI MELLAL-KHENIFRA                                    جهة بني ملال - خنيفرة
+PROVINCE DE KHENIFRA                                               إقليم خنيفرة
+COMMUNE DE KHENIFRA                                               جماعة خنيفرة
 
-AUTORISATION SPÉCIALE
+═══════════════════════════════════════════════════════════════════════════════
 
-Nom complet: ${permission.nomComplet}
-Matricule: ${permission.matricule}
-Carte Nationale: ${permission.carteNationale}
-Grade: ${permission.grade}
-Service: ${permission.service}
+                            AUTORISATION SPÉCIALE
+                              إذن خاص
 
-DÉTAILS DE L'AUTORISATION:
-Motif: ${permission.motif}
-Durée: ${permission.duree} ${permission.typeDuree}
-Date: ${permission.dateDebut}
-${permission.heureDebut ? `Heure de début: ${permission.heureDebut}` : ''}
-${permission.heureFin ? `Heure de fin: ${permission.heureFin}` : ''}
+═══════════════════════════════════════════════════════════════════════════════
 
-Date de la demande: ${permission.dateCreation}
+INFORMATIONS PERSONNELLES / المعلومات الشخصية
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Signature du demandeur: ____________________
+Nom complet / الاسم الكامل: ${permission.nomComplet}
+Matricule / رقم التأجير: ${permission.matricule}
+Carte Nationale / البطاقة الوطنية: ${permission.carteNationale}
+Grade / الرتبة: ${permission.grade}
+Service / الخدمة: ${permission.service}
 
-Visa du chef de service: ____________________
+DÉTAILS DE L'AUTORISATION / تفاصيل الإذن
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Observations: ________________________________
-____________________________________________
+Motif / السبب: ${permission.motif}
+Durée / المدة: ${permission.duree} ${permission.typeDuree === 'heures' ? 'heures / ساعات' : 'jours / أيام'}
+Date / التاريخ: ${permission.dateDebut}
+${permission.heureDebut ? `Heure de début / ساعة البداية: ${permission.heureDebut}` : ''}
+${permission.heureFin ? `Heure de fin / ساعة النهاية: ${permission.heureFin}` : ''}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Date de la demande / تاريخ الطلب: ${permission.dateCreation}
+
+SIGNATURES / التوقيعات
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Signature du demandeur / توقيع المطالب:
+_________________________________
+
+
+Date: _______________ Signature: ___________________
+
+
+Signature RH / توقيع الموارد البشرية:
+_________________________________
+
+
+Date: _______________ Signature: ___________________
+
+
+OBSERVATIONS / ملاحظات:
+____________________________________________________________________________
+____________________________________________________________________________
+____________________________________________________________________________
+
+═══════════════════════════════════════════════════════════════════════════════
     `;
 
-    const blob = new Blob([docContent], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([docContent], { type: 'application/pdf;charset=utf-8' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `autorisation_${permission.matricule}_${permission.dateCreation}.txt`);
+    link.setAttribute('download', `autorisation_speciale_${permission.matricule}_${permission.dateCreation}.pdf`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    toast.success('Document téléchargé avec succès');
+    toast.success('Autorisation spéciale téléchargée en PDF avec succès');
   };
 
   const printPermission = (permission: SpecialPermission) => {
@@ -154,58 +183,188 @@ ____________________________________________
           <head>
             <title>Autorisation Spéciale - ${permission.matricule}</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-              .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
+              body { 
+                font-family: 'Arial', sans-serif; 
+                margin: 20px; 
+                line-height: 1.6; 
+                color: #333;
+                font-size: 12px;
+              }
+              .header { 
+                display: flex; 
+                justify-content: space-between; 
+                text-align: center; 
+                margin-bottom: 30px; 
+                border-bottom: 3px solid #000; 
+                padding-bottom: 20px; 
+              }
+              .header-fr { text-align: left; }
+              .header-ar { text-align: right; direction: rtl; }
+              .title { 
+                font-size: 18px; 
+                font-weight: bold; 
+                margin: 30px 0; 
+                text-align: center;
+                text-decoration: underline;
+              }
+              .section-title {
+                font-weight: bold;
+                font-size: 14px;
+                border-bottom: 2px solid #333;
+                margin: 20px 0 10px 0;
+                padding-bottom: 5px;
+              }
               .content { margin: 20px 0; }
-              .field { margin-bottom: 15px; }
-              .signature-section { margin-top: 50px; display: flex; justify-content: space-between; }
-              .signature-box { border: 1px solid #000; padding: 40px 20px; text-align: center; width: 200px; }
-              .title { font-size: 20px; font-weight: bold; margin: 20px 0; text-align: center; }
+              .field { 
+                margin-bottom: 12px; 
+                display: flex;
+                justify-content: space-between;
+                padding: 5px 0;
+                border-bottom: 1px dotted #ccc;
+              }
+              .field strong { min-width: 200px; }
+              .signature-section { 
+                margin-top: 60px; 
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+              }
+              .signature-box { 
+                border: 2px solid #000; 
+                padding: 30px 20px; 
+                text-align: center; 
+                min-height: 120px;
+                background-color: #f9f9f9;
+              }
+              .signature-title {
+                font-weight: bold;
+                margin-bottom: 20px;
+                font-size: 13px;
+              }
+              .signature-line {
+                border-top: 1px solid #000;
+                margin-top: 40px;
+                padding-top: 10px;
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+              }
+              .observations-box {
+                border: 1px solid #000;
+                min-height: 80px;
+                padding: 10px;
+                margin-top: 10px;
+                background-color: #f9f9f9;
+              }
             </style>
           </head>
           <body>
             <div class="header">
-              <h3>ROYAUME DU MAROC</h3>
-              <h3>MINISTÈRE DE L'INTÉRIEUR</h3>
-              <h3>RÉGION BENI MELLAL-KHENIFRA</h3>
-              <h3>PROVINCE DE KHENIFRA</h3>
-              <h3>COMMUNE DE KHENIFRA</h3>
+              <div class="header-fr">
+                <div><strong>ROYAUME DU MAROC</strong></div>
+                <div><strong>MINISTÈRE DE L'INTÉRIEUR</strong></div>
+                <div><strong>RÉGION BENI MELLAL-KHENIFRA</strong></div>
+                <div><strong>PROVINCE DE KHENIFRA</strong></div>
+                <div style="color: #d32f2f;"><strong>COMMUNE DE KHENIFRA</strong></div>
+              </div>
+              
+              <div class="header-ar">
+                <div><strong>المملكة المغربية</strong></div>
+                <div><strong>وزارة الداخلية</strong></div>
+                <div><strong>جهة بني ملال - خنيفرة</strong></div>
+                <div><strong>إقليم خنيفرة</strong></div>
+                <div style="color: #d32f2f;"><strong>جماعة خنيفرة</strong></div>
+              </div>
             </div>
             
-            <div class="title">AUTORISATION SPÉCIALE</div>
+            <div class="title">
+              AUTORISATION SPÉCIALE<br>
+              <span style="font-size: 16px;">إذن خاص</span>
+            </div>
             
             <div class="content">
-              <div class="field"><strong>Nom complet:</strong> ${permission.nomComplet}</div>
-              <div class="field"><strong>Matricule:</strong> ${permission.matricule}</div>
-              <div class="field"><strong>Carte Nationale:</strong> ${permission.carteNationale}</div>
-              <div class="field"><strong>Grade:</strong> ${permission.grade}</div>
-              <div class="field"><strong>Service:</strong> ${permission.service}</div>
+              <div class="section-title">INFORMATIONS PERSONNELLES / المعلومات الشخصية</div>
               
-              <hr style="margin: 30px 0;">
+              <div class="field">
+                <strong>Nom complet / الاسم الكامل:</strong>
+                <span>${permission.nomComplet}</span>
+              </div>
+              <div class="field">
+                <strong>Matricule / رقم التأجير:</strong>
+                <span>${permission.matricule}</span>
+              </div>
+              <div class="field">
+                <strong>Carte Nationale / البطاقة الوطنية:</strong>
+                <span>${permission.carteNationale}</span>
+              </div>
+              <div class="field">
+                <strong>Grade / الرتبة:</strong>
+                <span>${permission.grade}</span>
+              </div>
+              <div class="field">
+                <strong>Service / الخدمة:</strong>
+                <span>${permission.service}</span>
+              </div>
               
-              <div class="field"><strong>Motif de l'autorisation:</strong> ${permission.motif}</div>
-              <div class="field"><strong>Durée:</strong> ${permission.duree} ${permission.typeDuree}</div>
-              <div class="field"><strong>Date:</strong> ${permission.dateDebut}</div>
-              ${permission.heureDebut ? `<div class="field"><strong>Heure de début:</strong> ${permission.heureDebut}</div>` : ''}
-              ${permission.heureFin ? `<div class="field"><strong>Heure de fin:</strong> ${permission.heureFin}</div>` : ''}
+              <div class="section-title">DÉTAILS DE L'AUTORISATION / تفاصيل الإذن</div>
               
-              <div class="field" style="margin-top: 30px;"><strong>Date de la demande:</strong> ${permission.dateCreation}</div>
+              <div class="field">
+                <strong>Motif / السبب:</strong>
+                <span>${permission.motif}</span>
+              </div>
+              <div class="field">
+                <strong>Durée / المدة:</strong>
+                <span>${permission.duree} ${permission.typeDuree === 'heures' ? 'heures / ساعات' : 'jours / أيام'}</span>
+              </div>
+              <div class="field">
+                <strong>Date / التاريخ:</strong>
+                <span>${permission.dateDebut}</span>
+              </div>
+              ${permission.heureDebut ? `
+                <div class="field">
+                  <strong>Heure de début / ساعة البداية:</strong>
+                  <span>${permission.heureDebut}</span>
+                </div>
+              ` : ''}
+              ${permission.heureFin ? `
+                <div class="field">
+                  <strong>Heure de fin / ساعة النهاية:</strong>
+                  <span>${permission.heureFin}</span>
+                </div>
+              ` : ''}
+              
+              <div style="margin-top: 30px; text-align: center;">
+                <strong>Date de la demande / تاريخ الطلب: ${permission.dateCreation}</strong>
+              </div>
+              
+              <div class="section-title">OBSERVATIONS / ملاحظات</div>
+              <div class="observations-box">
+                Espace réservé aux observations / مساحة مخصصة للملاحظات
+              </div>
             </div>
             
             <div class="signature-section">
               <div class="signature-box">
-                <div style="margin-bottom: 20px;">Signature du demandeur</div>
-                <div style="border-top: 1px solid #000; margin-top: 30px; padding-top: 5px;">Date et signature</div>
+                <div class="signature-title">
+                  Signature du demandeur<br>
+                  توقيع المطالب
+                </div>
+                <div class="signature-line">
+                  <span>Date:</span>
+                  <span>Signature:</span>
+                </div>
               </div>
+              
               <div class="signature-box">
-                <div style="margin-bottom: 20px;">Visa du chef de service</div>
-                <div style="border-top: 1px solid #000; margin-top: 30px; padding-top: 5px;">Date et signature</div>
+                <div class="signature-title">
+                  Signature RH<br>
+                  توقيع الموارد البشرية
+                </div>
+                <div class="signature-line">
+                  <span>Date:</span>
+                  <span>Signature:</span>
+                </div>
               </div>
-            </div>
-            
-            <div style="margin-top: 30px; border-top: 1px solid #000; padding-top: 20px;">
-              <strong>Observations:</strong>
-              <div style="border: 1px solid #000; height: 60px; margin-top: 10px;"></div>
             </div>
           </body>
         </html>
@@ -213,7 +372,7 @@ ____________________________________________
       printWindow.document.close();
       printWindow.print();
     }
-    toast.success('Document envoyé à l\'imprimante');
+    toast.success('Autorisation spéciale envoyée à l\'imprimante');
   };
 
   return (

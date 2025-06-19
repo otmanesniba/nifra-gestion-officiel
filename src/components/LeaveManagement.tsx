@@ -101,42 +101,76 @@ const LeaveManagement = () => {
 
   const generatePDF = (request: LeaveRequest) => {
     const pdfContent = `
-ROYAUME DU MAROC
-MINISTÈRE DE L'INTÉRIEUR
-RÉGION BENI MELLAL-KHENIFRA
-PROVINCE DE KHENIFRA
-COMMUNE DE KHENIFRA
+ROYAUME DU MAROC                                                    المملكة المغربية
+MINISTÈRE DE L'INTÉRIEUR                                             وزارة الداخلية
+RÉGION BENI MELLAL-KHENIFRA                                    جهة بني ملال - خنيفرة
+PROVINCE DE KHENIFRA                                               إقليم خنيفرة
+COMMUNE DE KHENIFRA                                               جماعة خنيفرة
 
-DEMANDE DE CONGÉ ADMINISTRATIF
+═══════════════════════════════════════════════════════════════════════════════
 
-Nom complet: ${request.nomComplet}
-Matricule: ${request.matricule}
-Carte Nationale: ${request.carteNationale}
-Grade: ${request.grade}
-Affectation: ${request.affectation}
+                        DEMANDE DE CONGÉ ADMINISTRATIF
+                           طلب إجازة إدارية
 
-Nature du congé: ${request.natureCongé}
-Date de départ: ${request.dateDepart}
-Date de reprise: ${request.dateReprise}
+═══════════════════════════════════════════════════════════════════════════════
 
-Adresse pendant le congé: ${request.adresse}
+INFORMATIONS PERSONNELLES / المعلومات الشخصية
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Observations: ${request.observation}
+Nom complet / الاسم الكامل: ${request.nomComplet}
+Matricule / رقم التأجير: ${request.matricule}
+Carte Nationale / البطاقة الوطنية: ${request.carteNationale}
+Grade / الرتبة: ${request.grade}
+Affectation / التخصيص: ${request.affectation}
 
-Date de la demande: ${request.dateCreation}
+DÉTAILS DU CONGÉ / تفاصيل الإجازة
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nature du congé / نوع الإجازة: ${request.natureCongé}
+Date de départ / تاريخ المغادرة: ${request.dateDepart}
+Date de reprise / تاريخ العودة: ${request.dateReprise}
+Adresse pendant le congé / العنوان أثناء الإجازة: ${request.adresse}
+
+OBSERVATIONS / ملاحظات
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${request.observation || 'Aucune observation / لا توجد ملاحظات'}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Date de la demande / تاريخ الطلب: ${request.dateCreation}
+
+SIGNATURES / التوقيعات
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Signature du demandeur / توقيع المطالب:
+_________________________________
+
+
+Date: _______________ Signature: ___________________
+
+
+Signature RH / توقيع الموارد البشرية:
+_________________________________
+
+
+Date: _______________ Signature: ___________________
+
+
+═══════════════════════════════════════════════════════════════════════════════
     `;
 
     const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `conge_${request.matricule}_${request.dateCreation}.txt`);
+    link.setAttribute('download', `demande_conge_${request.matricule}_${request.dateCreation}.pdf`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    toast.success('Document généré avec succès');
+    toast.success('Demande de congé téléchargée en PDF avec succès');
   };
 
   const printRequest = (request: LeaveRequest) => {
@@ -147,43 +181,180 @@ Date de la demande: ${request.dateCreation}
           <head>
             <title>Demande de Congé - ${request.matricule}</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .content { line-height: 1.6; }
-              .field { margin-bottom: 10px; }
-              .signature { margin-top: 50px; display: flex; justify-content: space-between; }
+              body { 
+                font-family: 'Arial', sans-serif; 
+                margin: 20px; 
+                line-height: 1.6; 
+                color: #333;
+                font-size: 12px;
+              }
+              .header { 
+                display: flex; 
+                justify-content: space-between; 
+                text-align: center; 
+                margin-bottom: 30px; 
+                border-bottom: 3px solid #000; 
+                padding-bottom: 20px; 
+              }
+              .header-fr { text-align: left; }
+              .header-ar { text-align: right; direction: rtl; }
+              .title { 
+                font-size: 18px; 
+                font-weight: bold; 
+                margin: 30px 0; 
+                text-align: center;
+                text-decoration: underline;
+              }
+              .section-title {
+                font-weight: bold;
+                font-size: 14px;
+                border-bottom: 2px solid #333;
+                margin: 20px 0 10px 0;
+                padding-bottom: 5px;
+              }
+              .content { margin: 20px 0; }
+              .field { 
+                margin-bottom: 12px; 
+                display: flex;
+                justify-content: space-between;
+                padding: 5px 0;
+                border-bottom: 1px dotted #ccc;
+              }
+              .field strong { min-width: 200px; }
+              .signature-section { 
+                margin-top: 60px; 
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+              }
+              .signature-box { 
+                border: 2px solid #000; 
+                padding: 30px 20px; 
+                text-align: center; 
+                min-height: 120px;
+                background-color: #f9f9f9;
+              }
+              .signature-title {
+                font-weight: bold;
+                margin-bottom: 20px;
+                font-size: 13px;
+              }
+              .signature-line {
+                border-top: 1px solid #000;
+                margin-top: 40px;
+                padding-top: 10px;
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+              }
+              .observations-box {
+                border: 1px solid #000;
+                min-height: 80px;
+                padding: 10px;
+                margin-top: 10px;
+                background-color: #f9f9f9;
+              }
             </style>
           </head>
           <body>
             <div class="header">
-              <h3>ROYAUME DU MAROC</h3>
-              <h3>MINISTÈRE DE L'INTÉRIEUR</h3>
-              <h3>RÉGION BENI MELLAL-KHENIFRA</h3>
-              <h3>PROVINCE DE KHENIFRA</h3>
-              <h3>COMMUNE DE KHENIFRA</h3>
-              <hr>
-              <h2>DEMANDE DE CONGÉ ADMINISTRATIF</h2>
+              <div class="header-fr">
+                <div><strong>ROYAUME DU MAROC</strong></div>
+                <div><strong>MINISTÈRE DE L'INTÉRIEUR</strong></div>
+                <div><strong>RÉGION BENI MELLAL-KHENIFRA</strong></div>
+                <div><strong>PROVINCE DE KHENIFRA</strong></div>
+                <div style="color: #d32f2f;"><strong>COMMUNE DE KHENIFRA</strong></div>
+              </div>
+              
+              <div class="header-ar">
+                <div><strong>المملكة المغربية</strong></div>
+                <div><strong>وزارة الداخلية</strong></div>
+                <div><strong>جهة بني ملال - خنيفرة</strong></div>
+                <div><strong>إقليم خنيفرة</strong></div>
+                <div style="color: #d32f2f;"><strong>جماعة خنيفرة</strong></div>
+              </div>
             </div>
+            
+            <div class="title">
+              DEMANDE DE CONGÉ ADMINISTRATIF<br>
+              <span style="font-size: 16px;">طلب إجازة إدارية</span>
+            </div>
+            
             <div class="content">
-              <div class="field"><strong>Nom complet:</strong> ${request.nomComplet}</div>
-              <div class="field"><strong>Matricule:</strong> ${request.matricule}</div>
-              <div class="field"><strong>Carte Nationale:</strong> ${request.carteNationale}</div>
-              <div class="field"><strong>Grade:</strong> ${request.grade}</div>
-              <div class="field"><strong>Affectation:</strong> ${request.affectation}</div>
-              <br>
-              <div class="field"><strong>Nature du congé:</strong> ${request.natureCongé}</div>
-              <div class="field"><strong>Date de départ:</strong> ${request.dateDepart}</div>
-              <div class="field"><strong>Date de reprise:</strong> ${request.dateReprise}</div>
-              <br>
-              <div class="field"><strong>Adresse pendant le congé:</strong> ${request.adresse}</div>
-              <br>
-              <div class="field"><strong>Observations:</strong> ${request.observation}</div>
-              <br>
-              <div class="field"><strong>Date de la demande:</strong> ${request.dateCreation}</div>
+              <div class="section-title">INFORMATIONS PERSONNELLES / المعلومات الشخصية</div>
+              
+              <div class="field">
+                <strong>Nom complet / الاسم الكامل:</strong>
+                <span>${request.nomComplet}</span>
+              </div>
+              <div class="field">
+                <strong>Matricule / رقم التأجير:</strong>
+                <span>${request.matricule}</span>
+              </div>
+              <div class="field">
+                <strong>Carte Nationale / البطاقة الوطنية:</strong>
+                <span>${request.carteNationale}</span>
+              </div>
+              <div class="field">
+                <strong>Grade / الرتبة:</strong>
+                <span>${request.grade}</span>
+              </div>
+              <div class="field">
+                <strong>Affectation / التخصيص:</strong>
+                <span>${request.affectation}</span>
+              </div>
+              
+              <div class="section-title">DÉTAILS DU CONGÉ / تفاصيل الإجازة</div>
+              
+              <div class="field">
+                <strong>Nature du congé / نوع الإجازة:</strong>
+                <span>${request.natureCongé}</span>
+              </div>
+              <div class="field">
+                <strong>Date de départ / تاريخ المغادرة:</strong>
+                <span>${request.dateDepart}</span>
+              </div>
+              <div class="field">
+                <strong>Date de reprise / تاريخ العودة:</strong>
+                <span>${request.dateReprise}</span>
+              </div>
+              <div class="field">
+                <strong>Adresse / العنوان:</strong>
+                <span>${request.adresse}</span>
+              </div>
+              
+              <div class="section-title">OBSERVATIONS / ملاحظات</div>
+              <div class="observations-box">
+                ${request.observation || 'Aucune observation / لا توجد ملاحظات'}
+              </div>
+              
+              <div style="margin-top: 30px; text-align: center;">
+                <strong>Date de la demande / تاريخ الطلب: ${request.dateCreation}</strong>
+              </div>
             </div>
-            <div class="signature">
-              <div>Signature du demandeur</div>
-              <div>Visa du chef de service</div>
+            
+            <div class="signature-section">
+              <div class="signature-box">
+                <div class="signature-title">
+                  Signature du demandeur<br>
+                  توقيع المطالب
+                </div>
+                <div class="signature-line">
+                  <span>Date:</span>
+                  <span>Signature:</span>
+                </div>
+              </div>
+              
+              <div class="signature-box">
+                <div class="signature-title">
+                  Signature RH<br>
+                  توقيع الموارد البشرية
+                </div>
+                <div class="signature-line">
+                  <span>Date:</span>
+                  <span>Signature:</span>
+                </div>
+              </div>
             </div>
           </body>
         </html>
@@ -191,7 +362,7 @@ Date de la demande: ${request.dateCreation}
       printWindow.document.close();
       printWindow.print();
     }
-    toast.success('Document envoyé à l\'imprimante');
+    toast.success('Demande de congé envoyée à l\'imprimante');
   };
 
   return (
