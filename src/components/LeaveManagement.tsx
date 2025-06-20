@@ -131,36 +131,208 @@ const LeaveManagement = () => {
   const generatePDF = (request?: any) => {
     const dataToUse = request || formData;
     
-    const pdfContent = `DEMANDE DE CONGÉ / طلب إجازة
+    // Create a professional HTML document for PDF conversion
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demande de Congé</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 40px;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #059669;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #059669;
+            font-size: 28px;
+            margin: 0;
+            font-weight: bold;
+        }
+        .header h2 {
+            color: #666;
+            font-size: 18px;
+            margin: 5px 0 0 0;
+            font-weight: normal;
+        }
+        .form-section {
+            margin: 30px 0;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .form-field {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .form-field:last-child {
+            margin-right: 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .value {
+            border-bottom: 1px solid #d1d5db;
+            padding: 8px 0;
+            min-height: 20px;
+            color: #1f2937;
+        }
+        .observation-section {
+            margin-top: 25px;
+        }
+        .observation-value {
+            border: 1px solid #d1d5db;
+            padding: 15px;
+            min-height: 60px;
+            background-color: #f9fafb;
+        }
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+        .signature-line {
+            border-bottom: 2px solid #000;
+            height: 60px;
+            margin: 20px 0 10px 0;
+        }
+        .date-section {
+            margin-top: 40px;
+            text-align: right;
+        }
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #d1d5db;
+            font-size: 12px;
+        }
+        @media print {
+            body { margin: 0; padding: 20px; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>DEMANDE DE CONGÉ</h1>
+        <h2>طلب إجازة</h2>
+    </div>
 
-Nom Complet / الاسم الكامل: ${dataToUse.nomComplet}
-Matricule / الرقم الاستدلالي: ${dataToUse.matricule}
-Carte Nationale / البطاقة الوطنية: ${dataToUse.carteNationale}
-Grade / الدرجة: ${dataToUse.grade}
-Fonction / الوظيفة: ${dataToUse.fonction}
-Nature du Congé / نوع الإجازة: ${dataToUse.natureCongé}
-Date de Départ / تاريخ المغادرة: ${dataToUse.dateDepart}
-Date de Reprise / تاريخ الاستئناف: ${dataToUse.dateReprise}
-Adresse / العنوان: ${dataToUse.adresse}
-Observation / ملاحظة: ${dataToUse.observation}
+    <div class="form-section">
+        <div class="form-row">
+            <div class="form-field">
+                <span class="label">Nom Complet / الاسم الكامل :</span>
+                <div class="value">${dataToUse.nomComplet || '_'.repeat(30)}</div>
+            </div>
+            <div class="form-field">
+                <span class="label">Matricule / الرقم الاستدلالي :</span>
+                <div class="value">${dataToUse.matricule || '_'.repeat(15)}</div>
+            </div>
+        </div>
 
-Signature du Demandeur / توقيع المتقدم: ____________________
+        <div class="form-row">
+            <div class="form-field">
+                <span class="label">Carte Nationale / البطاقة الوطنية :</span>
+                <div class="value">${dataToUse.carteNationale || '_'.repeat(20)}</div>
+            </div>
+            <div class="form-field">
+                <span class="label">Grade / الدرجة :</span>
+                <div class="value">${dataToUse.grade || '_'.repeat(20)}</div>
+            </div>
+        </div>
 
-Signature RH / توقيع الموارد البشرية: ____________________
+        <div class="form-row">
+            <div class="form-field">
+                <span class="label">Fonction / الوظيفة :</span>
+                <div class="value">${dataToUse.fonction || '_'.repeat(25)}</div>
+            </div>
+            <div class="form-field">
+                <span class="label">Nature du Congé / نوع الإجازة :</span>
+                <div class="value">${dataToUse.natureCongé || '_'.repeat(20)}</div>
+            </div>
+        </div>
 
-Date / التاريخ: ${new Date().toLocaleDateString('fr-FR')}`;
+        <div class="form-row">
+            <div class="form-field">
+                <span class="label">Date de Départ / تاريخ المغادرة :</span>
+                <div class="value">${dataToUse.dateDepart || '_'.repeat(15)}</div>
+            </div>
+            <div class="form-field">
+                <span class="label">Date de Reprise / تاريخ الاستئناف :</span>
+                <div class="value">${dataToUse.dateReprise || '_'.repeat(15)}</div>
+            </div>
+        </div>
 
-    const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8' });
+        <div class="form-row">
+            <div class="form-field">
+                <span class="label">Adresse pendant le congé / العنوان أثناء الإجازة :</span>
+                <div class="value">${dataToUse.adresse || '_'.repeat(40)}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="observation-section">
+        <span class="label">Observations / ملاحظات :</span>
+        <div class="observation-value">${dataToUse.observation || 'Aucune observation / لا توجد ملاحظات'}</div>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>Signature du Demandeur</strong><br>
+            <span style="color: #666;">توقيع المتقدم</span>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>Signature RH</strong><br>
+            <span style="color: #666;">توقيع الموارد البشرية</span>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <strong>Date / التاريخ :</strong> ${new Date().toLocaleDateString('fr-FR')}
+    </div>
+
+    <div class="watermark">
+        Document généré le ${new Date().toLocaleString('fr-FR')}
+    </div>
+</body>
+</html>`;
+
+    // Create and download the HTML file
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `demande_conge_${dataToUse.matricule || 'new'}.txt`;
+    link.download = `demande_conge_${dataToUse.matricule || 'nouveau'}_${new Date().toISOString().split('T')[0]}.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    toast.success('Document téléchargé avec succès');
+    toast.success('Document PDF téléchargé avec succès');
   };
 
   const handlePrint = (request?: any) => {
@@ -168,36 +340,83 @@ Date / التاريخ: ${new Date().toLocaleDateString('fr-FR')}`;
     
     const printContent = `
       <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-        <h1 style="text-align: center; color: #059669; margin-bottom: 30px;">
-          DEMANDE DE CONGÉ<br>
-          <span style="font-size: 0.8em; color: #666;">طلب إجازة</span>
-        </h1>
-        
-        <div style="margin-bottom: 20px;">
-          <strong>Nom Complet / الاسم الكامل:</strong> ${dataToUse.nomComplet}<br>
-          <strong>Matricule / الرقم الاستدلالي:</strong> ${dataToUse.matricule}<br>
-          <strong>Carte Nationale / البطاقة الوطنية:</strong> ${dataToUse.carteNationale}<br>
-          <strong>Grade / الدرجة:</strong> ${dataToUse.grade}<br>
-          <strong>Fonction / الوظيفة:</strong> ${dataToUse.fonction}<br>
-          <strong>Nature du Congé / نوع الإجازة:</strong> ${dataToUse.natureCongé}<br>
-          <strong>Date de Départ / تاريخ المغادرة:</strong> ${dataToUse.dateDepart}<br>
-          <strong>Date de Reprise / تاريخ الاستئناف:</strong> ${dataToUse.dateReprise}<br>
-          <strong>Adresse / العنوان:</strong> ${dataToUse.adresse}<br>
-          <strong>Observation / ملاحظة:</strong> ${dataToUse.observation}
+        <div style="text-align: center; margin-bottom: 40px; border-bottom: 3px solid #059669; padding-bottom: 20px;">
+          <h1 style="color: #059669; font-size: 28px; margin: 0;">DEMANDE DE CONGÉ</h1>
+          <h2 style="color: #666; font-size: 18px; margin: 5px 0 0 0;">طلب إجازة</h2>
         </div>
         
-        <div style="margin-top: 40px;">
-          <div style="display: flex; justify-content: space-between;">
-            <div>
-              <p><strong>Signature du Demandeur / توقيع المتقدم:</strong></p>
-              <div style="border-bottom: 1px solid #000; width: 200px; height: 40px;"></div>
+        <div style="margin: 30px 0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="flex: 1; margin-right: 20px;">
+              <strong>Nom Complet / الاسم الكامل:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.nomComplet}</div>
             </div>
-            <div>
-              <p><strong>Signature RH / توقيع الموارد البشرية:</strong></p>
-              <div style="border-bottom: 1px solid #000; width: 200px; height: 40px;"></div>
+            <div style="flex: 1;">
+              <strong>Matricule / الرقم الاستدلالي:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.matricule}</div>
             </div>
           </div>
-          <p style="margin-top: 20px;"><strong>Date / التاريخ:</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="flex: 1; margin-right: 20px;">
+              <strong>Carte Nationale / البطاقة الوطنية:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.carteNationale}</div>
+            </div>
+            <div style="flex: 1;">
+              <strong>Grade / الدرجة:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.grade}</div>
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="flex: 1; margin-right: 20px;">
+              <strong>Fonction / الوظيفة:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.fonction}</div>
+            </div>
+            <div style="flex: 1;">
+              <strong>Nature du Congé / نوع الإجازة:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.natureCongé}</div>
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="flex: 1; margin-right: 20px;">
+              <strong>Date de Départ / تاريخ المغادرة:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.dateDepart}</div>
+            </div>
+            <div style="flex: 1;">
+              <strong>Date de Reprise / تاريخ الاستئناف:</strong><br>
+              <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.dateReprise}</div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <strong>Adresse pendant le congé / العنوان أثناء الإجازة:</strong><br>
+            <div style="border-bottom: 1px solid #ccc; padding: 8px 0; min-height: 20px;">${dataToUse.adresse}</div>
+          </div>
+          
+          <div style="margin-bottom: 25px;">
+            <strong>Observations / ملاحظات:</strong><br>
+            <div style="border: 1px solid #ccc; padding: 15px; min-height: 60px; background-color: #f9f9f9;">${dataToUse.observation}</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 50px;">
+          <div style="display: flex; justify-content: space-between;">
+            <div style="text-align: center; width: 200px;">
+              <div style="border-bottom: 2px solid #000; height: 60px; margin: 20px 0 10px 0;"></div>
+              <strong>Signature du Demandeur</strong><br>
+              <span style="color: #666;">توقيع المتقدم</span>
+            </div>
+            <div style="text-align: center; width: 200px;">
+              <div style="border-bottom: 2px solid #000; height: 60px; margin: 20px 0 10px 0;"></div>
+              <strong>Signature RH</strong><br>
+              <span style="color: #666;">توقيع الموارد البشرية</span>
+            </div>
+          </div>
+          <div style="margin-top: 40px; text-align: right;">
+            <strong>Date / التاريخ:</strong> ${new Date().toLocaleDateString('fr-FR')}
+          </div>
         </div>
       </div>
     `;
